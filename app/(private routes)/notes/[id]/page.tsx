@@ -1,22 +1,26 @@
+// app/(private routes)/notes/[id]/page.tsx
 import {
   QueryClient,
   dehydrate,
   HydrationBoundary,
 } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
+import { getServerNoteById } from '@/lib/api/serverApi';
 import NoteDetailsClient from './NoteDetails.client';
 import { Metadata } from 'next';
 
 type PageProps = {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 };
 
-export async function generateMetadata({params,}: PageProps): Promise<Metadata> {
-  const { id } = await params;
-  const note = await fetchNoteById(id);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { id } = params;
+
+  const note = await getServerNoteById(id);
 
   const title = note?.title?.trim() || 'Note';
-  const description = ((note?.content ?? '').trim()).slice(0, 100);
+  const description = (note?.content ?? '').trim().slice(0, 100);
   return {
     title: `Note: ${title}`,
     description,
@@ -41,12 +45,12 @@ export async function generateMetadata({params,}: PageProps): Promise<Metadata> 
 const NoteDetails = async ({ params }: PageProps) => {
   const queryClient = new QueryClient();
 
-  const { id } = await params;
+  const { id } = params;
 
   try {
     await queryClient.prefetchQuery({
       queryKey: ['note', id],
-      queryFn: () => fetchNoteById(id),
+      queryFn: () => getServerNoteById(id),
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
@@ -54,7 +58,7 @@ const NoteDetails = async ({ params }: PageProps) => {
   }
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NoteDetailsClient />
+      <NoteDetailsClient noteId={id} />
     </HydrationBoundary>
   );
 };

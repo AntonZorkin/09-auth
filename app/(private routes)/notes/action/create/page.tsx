@@ -1,3 +1,5 @@
+// app/(private routes)/notes/action/create/page.tsx
+
 import css from './CreateNote.module.css';
 import { Metadata } from 'next';
 import NoteForm from '@/components/NoteForm/NoteForm';
