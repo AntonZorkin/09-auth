@@ -1,35 +1,20 @@
-// lib/api/api.ts
-
 import axios, { AxiosError } from 'axios';
-import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      { protocol: 'https', hostname: 'ac.goit.global' }
-    ]
-  }
-};
 
-export default nextConfig;
+export type ApiError = AxiosError;
 
-const FALLBACK_URL = 'https://notehub-api.goit.study/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-const FINAL_BASE_URL = process.env.NEXT_PUBLIC_API_URL || FALLBACK_URL;
+if (!API_URL) {
+  throw new Error('NEXT_PUBLIC_API_URL environment variable is not set.');
+}
 
 export const nextClient = axios.create({
-  baseURL: FINAL_BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  baseURL: API_URL,
+  withCredentials: true, 
 });
 
 export const nextServer = axios.create({
-  baseURL: FINAL_BASE_URL,
-  withCredentials: true,
+  baseURL: API_URL,
+  withCredentials: true, 
 });
-
-export type ApiError = AxiosError<{
-  error: string;
-}>;
