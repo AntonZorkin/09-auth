@@ -1,6 +1,17 @@
 // lib/api/api.ts
 
 import axios, { AxiosError } from 'axios';
+import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: 'https', hostname: 'ac.goit.global' }
+    ]
+  }
+};
+
+export default nextConfig;
 
 const FALLBACK_URL = 'https://notehub-api.goit.study/api';
 
