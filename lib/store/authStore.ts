@@ -1,45 +1,22 @@
 // lib/store/authStore.ts
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { User } from '@/types/user';
+import { User } from '../../types/user';
 
-interface AuthState {
-  user: User | null;
+interface AuthStore {
   isAuthenticated: boolean;
-  
-  login: (user: User) => void;
-  logout: () => void;
-  updateUser: (newUser: Partial<User>) => void; 
+  user: User | null;
+  setUser: (user: User) => void;
+  clearIsAuthenticated: () => void;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-
-      login: (user) => 
-        set({
-          user,
-          isAuthenticated: true,
-        }),
-
-      logout: () => 
-        set({
-          user: null,
-          isAuthenticated: false,
-        }),
-
-      updateUser: (newUserPartial) => 
-        set((state) => ({
-          user: state.user 
-            ? { ...state.user, ...newUserPartial } 
-            : null,
-        })),
-    }),
-    {
-      name: 'auth-storage', 
-    }
-  )
-);
+export const useAuthStore = create<AuthStore>()(set => ({
+  isAuthenticated: false,
+  user: null,
+  setUser: (user: User) => {
+    set(() => ({ user, isAuthenticated: true }));
+  },
+  clearIsAuthenticated: () => {
+    set(() => ({ user: null, isAuthenticated: false }));
+  },
+}));

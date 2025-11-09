@@ -4,7 +4,7 @@ import {
   dehydrate,
   HydrationBoundary,
 } from '@tanstack/react-query';
-import { getServerNoteById } from '@/lib/api/serverApi';
+import { fetchNoteById  } from '@/lib/api/serverApi';
 import NoteDetailsClient from './NoteDetails.client';
 import { Metadata } from 'next';
 
@@ -17,7 +17,7 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { id } = params;
 
-  const note = await getServerNoteById(id);
+  const note = await fetchNoteById (id);
 
   const title = note?.title?.trim() || 'Note';
   const description = (note?.content ?? '').trim().slice(0, 100);
@@ -45,12 +45,12 @@ export async function generateMetadata({
 const NoteDetails = async ({ params }: PageProps) => {
   const queryClient = new QueryClient();
 
-  const { id } = params;
+  const { id } = await params;
 
   try {
     await queryClient.prefetchQuery({
       queryKey: ['note', id],
-      queryFn: () => getServerNoteById(id),
+      queryFn: () => fetchNoteById (id),
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';

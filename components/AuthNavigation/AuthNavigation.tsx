@@ -10,40 +10,33 @@ import css from './AuthNavigation.module.css';
 
 const AuthNavigation = () => {
   const router = useRouter();
-  const { isAuthenticated, user, logout: storeLogout } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
+
+  const clearIsAuthenticated = useAuthStore(
+    state => state.clearIsAuthenticated
+  );
 
   const handleLogout = async () => {
-    try {
-      await logout(); 
-      storeLogout(); 
-      router.push('/sign-in');
-    } catch (error) {
-      storeLogout(); 
-      router.push('/sign-in');
-      console.error('Logout failed:', error);
-    }
+    await logout();
+    clearIsAuthenticated();
+    router.push('/sign-in');
   };
 
-  if (isAuthenticated && user) {
-    return (
-      <>
-        <li className={css.navigationItem}>
-          <Link href="/profile" prefetch={false} className={css.navigationLink}>
-            Profile
-          </Link>
-        </li>
-
-        <li className={css.navigationItem}>
-          <p className={css.userEmail}>{user.email}</p>
-          <button onClick={handleLogout} className={css.logoutButton}>
-            Logout
-          </button>
-        </li>
-      </>
-    );
-  }
-
-  return (
+  return isAuthenticated ? (
+    <>
+      <li className={css.navigationItem}>
+        <Link href="/profile" prefetch={false} className={css.navigationLink}>
+          Profile
+        </Link>
+      </li>
+      <li className={css.navigationItem}>
+        <p className={css.userEmail}>{user?.email}</p>
+        <button onClick={handleLogout} className={css.logoutButton}>
+          Logout
+        </button>
+      </li>
+    </>
+  ) : (
     <>
       <li className={css.navigationItem}>
         <Link href="/sign-in" prefetch={false} className={css.navigationLink}>
@@ -59,5 +52,6 @@ const AuthNavigation = () => {
     </>
   );
 };
+
 
 export default AuthNavigation;

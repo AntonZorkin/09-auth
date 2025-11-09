@@ -1,53 +1,56 @@
-// app/(private routes)/profile/page.tsx
-
-import Link from 'next/link';
 import Image from 'next/image';
-import { getServerMe } from '@/lib/api/serverApi';
-import css from './ProfilePage.module.css'; 
+import Link from 'next/link';
 
-const defaultAvatar = '/public/avatar.webp'; 
+import { Metadata } from 'next';
+import css from './ProfilePage.module.css';
+import { getMe } from '@/lib/api/serverApi';
 
-const ProfilePage = async () => {
-  let user;
-  
+export const metadata: Metadata = {
+  title: `Profile`,
+  description: `Your Profile`,
+  openGraph: {
+    title: `Profile`,
+    description: `Your Profile`,
+    url: `https://notehub.com/profile/`,
+    images: [
+      {
+        url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'NoteHub',
+      },
+    ],
+  },
+};
 
-  try {
-    user = await getServerMe();
-  } catch (error) {
-    return (
-      <section className={css.container}>
-        <h1>Error</h1>
-        <p>Could not load profile data. Check if you are logged in.</p>
-      </section>
-    );
-  }
+const Profile = async () => {
+  const user = await getMe();
 
   return (
-    <section className={css.container}>
-      <div className={css.header}>
+    <main className={css.mainContent}>
+      <div className={css.profileCard}>
+        <div className={css.header}>
+          <h1 className={css.formTitle}>Profile Page</h1>
+          <Link href="/profile/edit" className={css.editProfileButton}>
+            Edit Profile
+          </Link>
+        </div>
         <div className={css.avatarWrapper}>
-          <Image 
-            src={user.avatarUrl || defaultAvatar}
-            alt={`${user.userName}'s avatar`}
-            width={120} 
+          <Image
+            src={user.avatar}
+            alt="User Avatar"
+            width={120}
             height={120}
             className={css.avatar}
           />
         </div>
-        <div>
-          <h1 className={css.title}>My Profile</h1>
-          <Link href="/profile/edit" className={css.editLink}>
-            Edit profile
-          </Link>
+        <div className={css.profileInfo}>
+          <p>Username: {user.username}</p>
+          <p>Email: {user.email}</p>
         </div>
       </div>
-      
-      <div className={css.details}>
-        <p><strong>Name:</strong> {user.userName}</p>
-        <p><strong>Email:</strong> {user.email}</p>
-      </div>
-    </section>
+    </main>
   );
 };
 
-export default ProfilePage;
+export default Profile;

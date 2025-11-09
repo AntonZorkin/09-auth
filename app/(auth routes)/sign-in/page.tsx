@@ -1,64 +1,42 @@
-// app/(auth routes)/sign-in/page.tsx
-
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { login } from '@/lib/api/clientApi';
+import { login, LoginDetails } from '@/lib/api/clientApi';
+import { ApiError } from '@/lib/api/api';
 import { useAuthStore } from '@/lib/store/authStore';
 import css from './SignInPage.module.css';
 
-const SignInPage = () => {
+const SignIn = () => {
   const router = useRouter();
-  const storeLogin = useAuthStore((state) => state.login);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const setUser = useAuthStore(state => state.setUser);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
-    if (!email || !password) {
-      setError('Email and password are required.');
-      setIsLoading(false);
-      return;
-    }
-
+  const handleSubmit = async (formData: FormData) => {
     try {
-      const user = await login({ email, password });
-      storeLogin(user);
-      router.push('/profile');
-    } catch (err: unknown) { 
-      let errorMessage = 'Login failed. Check credentials.';
-      if (
-        typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof err.response === 'object' &&
-        err.response !== null &&
-        'data' in err.response &&
-        typeof err.response.data === 'object' &&
-        err.response.data !== null &&
-        'message' in err.response.data &&
-        typeof err.response.data.message === 'string'
-      ) {
-          errorMessage = err.response.data.message;
+      const formValues = Object.fromEntries(
+        formData
+      ) as unknown as LoginDetails;
+
+      const response = await login(formValues);
+
+      if (response) {
+        setUser(response);
+        router.push('/profile');
+      } else {
+        setError('Invalid email or password');
       }
-      
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      setError(
+        (error as ApiError).response?.data?.error ??
+          (error as ApiError).message ??
+          'Oops... some error'
+      );
     }
   };
 
   return (
     <main className={css.mainContent}>
-      <form className={css.form} onSubmit={handleSubmit}>
+      <form action={handleSubmit} className={css.form}>
         <h1 className={css.formTitle}>Sign in</h1>
 
         <div className={css.formGroup}>
@@ -84,15 +62,14 @@ const SignInPage = () => {
         </div>
 
         <div className={css.actions}>
-          <button type="submit" className={css.submitButton} disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Log in'}
+          <button type="submit" className={css.submitButton}>
+            Log in
           </button>
         </div>
-
         {error && <p className={css.error}>{error}</p>}
       </form>
     </main>
   );
 };
 
-export default SignInPage;
+export default SignIn;

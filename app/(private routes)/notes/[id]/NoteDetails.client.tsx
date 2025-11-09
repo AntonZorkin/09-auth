@@ -1,45 +1,43 @@
-// app/(private routes)/notes/[id]/NoteDetails.client.tsx
-
 'use client';
+
 import { useQuery } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api/clientApi';
-import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 import css from './NoteDetails.module.css';
+import { fetchNoteById } from '@/lib/api/clientApi';
+import Error from './error';
 
-interface NoteDetailsClientProps {
-  noteId: string;
-}
+const NoteDetailsClient = () => {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
-const NoteDetailsClient = ({ noteId }: NoteDetailsClientProps) => {
-  const {
-    data: note,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ['note', noteId],
-    queryFn: () => fetchNoteById(noteId),
-    enabled: !!noteId,
+  const back = () => router.back();
+
+  const { data: note, error } = useQuery({
+    queryKey: ['note', id],
+    queryFn: () => fetchNoteById(id),
+    refetchOnMount: false,
   });
 
-  if (isLoading) {
-    return <p>Loading note details...</p>;
-  }
+  if (error) return <Error error={error} />;
+  if (!note) return <p>Something went wrong.</p>;
 
-  if (isError || !note) {
-    return (
-      <p style={{ color: 'red' }}>Error: Note not found or failed to load.</p>
-    );
-  }
+  const formattedDate = note.updatedAt
+    ? `Updated at: ${note.updatedAt}`
+    : `Created at: ${note.createdAt}`;
 
   return (
-    <main>
-      <h1 className={css.header}>{note.title}</h1>
-      <div className={css.metadata}>
-        <span className={css.tag}>Tag: {note.tag}</span>
-        <Link href={`/notes/edit/${note.id}`}>Edit</Link>
+    <div className={css.container}>
+      <button onClick={back} className={css.backBtn}>
+        Back
+      </button>
+      <div className={css.item}>
+        <div className={css.header}>
+          <h2>{note.title}</h2>
+        </div>
+        <p className={css.content}>{note.content}</p>
+        <p className={css.date}>{formattedDate}</p>
       </div>
-      <p className={css.content}>{note.content}</p>
-    </main>
+    </div>
   );
 };
 
