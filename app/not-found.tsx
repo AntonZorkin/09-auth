@@ -1,25 +1,22 @@
-import Link from 'next/link';
-import css from './page.module.css'
+// app/not-found.tsx
 import { Metadata } from 'next';
+import css from './Home.module.css';
 
 export const metadata: Metadata = {
-  title: '404 — Page Not Found | NoteHub',
-  description: 'The page you’re looking for doesn’t exist or was moved. Go back to the homepage',
-
+  title: 'Page Not Found',
+  description: 'Sorry, the page you are looking for does not exist.',
   openGraph: {
-    title: `404 — Page Not Found | NoteHub`,
-    description: 'The page you’re looking for doesn’t exist or was moved. Go back to the homepage',
-    url: `https://08-zustand-nine-gamma.vercel.app/`,
-    siteName: 'NoteHub',
+    title: 'Page Not Found',
+    description: 'Sorry, the page you are looking for does not exist.',
+    url: 'https://notehub.com',
     images: [
       {
         url: 'https://ac.goit.global/fullstack/react/notehub-og-meta.jpg',
         width: 1200,
         height: 630,
-        alt: `NoteHub image`,
+        alt: 'NoteHub',
       },
     ],
-    type: 'website',
   },
 };
 
@@ -30,7 +27,6 @@ const NotFound = () => {
       <p className={css.description}>
         Sorry, the page you are looking for does not exist.
       </p>
-      <Link href="/">Go back home</Link>
     </div>
   );
 };

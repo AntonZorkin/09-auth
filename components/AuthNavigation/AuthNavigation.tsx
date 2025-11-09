@@ -1,13 +1,11 @@
-// components/AuthNavigation/AuthNavigation.tsx
-
 'use client';
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { logout } from '@/lib/api/clientApi';
-import css from './AuthNavigation.module.css';
 
+import css from './AuthNavigation.module.css';
 const AuthNavigation = () => {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
@@ -52,6 +50,5 @@ const AuthNavigation = () => {
     </>
   );
 };
-
 
 export default AuthNavigation;

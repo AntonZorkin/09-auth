@@ -1,4 +1,4 @@
-// app/notes/[id]/error.tsx
+// app/(.)notes/[id]/error.tsx
 
 'use client';
 

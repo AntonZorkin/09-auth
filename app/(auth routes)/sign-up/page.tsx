@@ -5,17 +5,18 @@ import { useRouter } from 'next/navigation';
 import css from './SignUpPage.module.css';
 import { register, RegistrationDetails } from '@/lib/api/clientApi';
 import { useAuthStore } from '@/lib/store/authStore';
-import { ApiError } from '@/lib/api/api';
+import axios from 'axios';
 
 const SignUp = () => {
   const router = useRouter();
-  const [error, setError] = useState('');
-  const setUser = useAuthStore(state => state.setUser);
+  const [error, setError] = useState(''); 
+  const setUser = useAuthStore((state) => state.setUser); 
 
   const handleSubmit = async (formData: FormData) => {
+    setError('');
     try {
       const formValues = Object.fromEntries(
-        formData
+        formData,
       ) as unknown as RegistrationDetails;
 
       const response = await register(formValues);
@@ -27,20 +28,27 @@ const SignUp = () => {
         setError('Invalid email or password');
       }
     } catch (error) {
-      setError(
-        (error as ApiError).response?.data?.error ??
-          (error as ApiError).message ??
-          'Oops... some error'
-      );
+ 
+      if (axios.isAxiosError(error)) {
+        setError(
+          (error.response?.data as { message?: string })?.message ||
+            error.message ||
+            'Oops... some error',
+        );
+      } else {
+        setError('An unexpected error occurred');
+      }
     }
   };
 
   return (
     <main className={css.mainContent}>
-      <h1 className={css.formTitle}>Sign up</h1>
+            <h1 className={css.formTitle}>Sign up</h1>     {' '}
       <form action={handleSubmit} className={css.form}>
+               {' '}
         <div className={css.formGroup}>
-          <label htmlFor="email">Email</label>
+                    <label htmlFor="email">Email</label>
+                   {' '}
           <input
             id="email"
             type="email"
@@ -48,10 +56,12 @@ const SignUp = () => {
             className={css.input}
             required
           />
+                 {' '}
         </div>
-
+               {' '}
         <div className={css.formGroup}>
-          <label htmlFor="password">Password</label>
+                    <label htmlFor="password">Password</label>
+                   {' '}
           <input
             id="password"
             type="password"
@@ -59,15 +69,19 @@ const SignUp = () => {
             className={css.input}
             required
           />
+                 {' '}
         </div>
-
+               {' '}
         <div className={css.actions}>
+                   {' '}
           <button type="submit" className={css.submitButton}>
-            Register
+                        Register          {' '}
           </button>
+                 {' '}
         </div>
-        {error && <p className={css.error}>{error}</p>}
+                {error && <p className={css.error}>{error}</p>}     {' '}
       </form>
+         {' '}
     </main>
   );
 };

@@ -41,9 +41,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
     setSearch(value);
   }, 400);
 
-  const handlePageChange = (selectedPage: number) => {
-    setPage(selectedPage);
-  };
 
   return (
     <div className={css.app}>
@@ -51,9 +48,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
       <div className={css.toolbar}>
         <SearchBox value={search} onChange={updateSearchQuery} />
         {isSuccess && totalPages > 1 && (
-          <Pagination page={page} totalPages={totalPages} setPage={handlePageChange} />
+          <Pagination page={page} totalPages={totalPages} setPage={setPage} />
         )}
-        <Link href="/notes/action/create" className={css.button}>
+        <Link href='/notes/action/create'
+          className={css.button}
+        >
           Create note +
         </Link>
       </div>

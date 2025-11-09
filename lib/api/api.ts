@@ -1,5 +1,6 @@
-import axios, { AxiosError } from 'axios';
+// lib/api/api.ts
 
+import axios, { AxiosError } from "axios";
 
 export type ApiError = AxiosError;
 
@@ -11,10 +12,10 @@ if (!API_URL) {
 
 export const nextClient = axios.create({
   baseURL: API_URL,
-  withCredentials: true, 
+  withCredentials: true,
 });
 
 export const nextServer = axios.create({
   baseURL: API_URL,
-  withCredentials: true, 
+  withCredentials: true,
 });

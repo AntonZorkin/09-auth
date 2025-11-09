@@ -1,129 +1,121 @@
 'use client';
 
-import css from './NoteForm.module.css';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createNote } from '@/lib/api';
-import type { NewNote, Note } from '../../types/note';
-import type { AxiosError } from 'axios';
-import toast from 'react-hot-toast';
-import Loader from '../Loader/Loader';
+import { useState, useId } from 'react';
 import { useRouter } from 'next/navigation';
-import { useNoteDraftStore } from '@/lib/store/noteStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'react-hot-toast';
+import { initialDraft, useDraftNoteStore } from '@/lib/store/noteStore';
+import css from './NoteForm.module.css';
+import { createNote, CreateNoteData } from '@/lib/api/clientApi';
+import Loading from '@/app/loading';
 
-const NoteForm = ({}) => {
+const tagsList = ['Work', 'Personal', 'Meeting', 'Shopping', 'Todo'];
+
+export default function NoteForm() {
+  const [isDisabled, setIsDisabled] = useState(false);
+  const fieldId = useId();
+  const queryClient = useQueryClient();
   const router = useRouter();
-  const { draft, setDraft, clearDraft } = useNoteDraftStore();
-  const handleChange = (
-    event: React.ChangeEvent<
+  const { draft, setDraft, clearDraft } = useDraftNoteStore();
+
+  const handleInput = (
+    e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    >
   ) => {
     setDraft({
       ...draft,
-      [event.target.name]: event.target.value,
+      [e.target.name]: e.target.value,
     });
   };
-  const queryClient = useQueryClient();
-  const { mutate, isPending } = useMutation<Note, AxiosError, NewNote>({
+
+  const newNote = useMutation({
     mutationFn: createNote,
     onSuccess: () => {
-      clearDraft()
+      toast.success('Note added!', { position: 'bottom-center' });
       queryClient.invalidateQueries({ queryKey: ['notes'] });
-      toast.success('Note added');
-      router.back();
-    },
-
-    onError: (err) => {
-      const msg =
-        (err.response?.data as { message?: string })?.message ||
-        err.message ||
-        'Something went wrong';
-      toast.error(msg);
+      clearDraft();
+      router.push('/notes/filter/all');
     },
   });
 
-  const handleCancel = () => {
-    router.back();
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    const title = (formData.get('title') as string).trim();
-    const content = (formData.get('content') as string).trim();
-    const tag = formData.get('tag') as NewNote['tag'];
-    if (title.length < 3) {
-      toast.error('Title must be at least 3 characters');
-      return;
+  const handleSubmit = (formData: FormData) => {
+    if (formData) {
+      const values = Object.fromEntries(formData) as unknown as CreateNoteData;
+      setIsDisabled(!isDisabled);
+      newNote.mutate(values);
     }
-
-    mutate({ title, content, tag });
   };
+
+  const handleCancel = () => router.push('/notes/filter/all');
 
   return (
-    <form action={handleSubmit} className={css.form}>
-      <fieldset disabled={isPending}>
+    <>
+      <form className={css.form} action={handleSubmit}>
         <div className={css.formGroup}>
-          <label htmlFor="title">Title</label>
+          <label htmlFor={`${fieldId}-title`}>Title</label>
           <input
-            id="title"
+            id={`${fieldId}-title`}
             type="text"
             name="title"
-            defaultValue={draft?.title} onChange={handleChange}
             className={css.input}
-            required
+            value={draft?.title ?? initialDraft.title}
+            onChange={handleInput}
             minLength={3}
             maxLength={50}
-            placeholder="Enter title…"
-            autoFocus
+            required
           />
         </div>
 
         <div className={css.formGroup}>
-          <label htmlFor="content">Content</label>
+          <label htmlFor={`${fieldId}-content`}>Content</label>
           <textarea
-            id="content"
+            id={`${fieldId}-content`}
             name="content"
-            defaultValue={draft?.content} onChange={handleChange}
             rows={8}
             className={css.textarea}
-            placeholder="Optional text…"
+            value={draft?.content ?? initialDraft.content}
+            onChange={handleInput}
+            maxLength={500}
           />
         </div>
 
         <div className={css.formGroup}>
-          <label htmlFor="tag">Tag</label>
+          <label htmlFor={`${fieldId}-tag`}>Tag</label>
           <select
-            id="tag"
+            id={`${fieldId}-tag`}
             name="tag"
-            defaultValue={draft?.tag} onChange={handleChange}
             className={css.select}
+            value={draft.tag ?? initialDraft.tag}
+            onChange={handleInput}
+            required
           >
-            <option value="Todo">Todo</option>
-            <option value="Work">Work</option>
-            <option value="Personal">Personal</option>
-            <option value="Meeting">Meeting</option>
-            <option value="Shopping">Shopping</option>
+            {tagsList.map((tag, i) => (
+              <option key={i} value={tag}>
+                {tag}
+              </option>
+            ))}
           </select>
         </div>
-      </fieldset>
 
-      <div className={css.actions}>
-        <button
-          onClick={handleCancel}
-          type="button"
-          className={css.cancelButton}
-          disabled={isPending}
-        >
-          Cancel
-        </button>
-
-        {isPending && <Loader />}
-
-        <button type="submit" className={css.submitButton} disabled={isPending}>
-          {isPending ? 'Creating...' : 'Create note'}
-        </button>
-      </div>
-    </form>
+        <div className={css.actions}>
+          <button
+            type="button"
+            className={css.cancelButton}
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className={css.submitButton}
+            disabled={isDisabled}
+          >
+            Create note
+          </button>
+        </div>
+      </form>
+      {newNote.isPending && <Loading />}
+    </>
   );
-};
-
-export default NoteForm;
+}

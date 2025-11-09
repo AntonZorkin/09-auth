@@ -1,3 +1,3 @@
-export default function Default() {
-  return null;
-}
+const ModalDefault = () => null;
+
+export default ModalDefault;
