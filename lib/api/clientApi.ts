@@ -35,34 +35,34 @@ export const fetchNotes = async (
     ? { search: searchQuery, tag, page, perPage }
     : { search: searchQuery, page, perPage };
 
-  const response = await nextServer.get<FetchNotesResponse>('/api/notes', {
+  const response = await nextServer.get<FetchNotesResponse>('/notes', {
     params,
   });
   return response.data;
 };
 
 export const fetchNoteById = async (id: Note['id']): Promise<Note> => {
-  const response = await nextServer.get<Note>(`/api/notes/${id}`);
+  const response = await nextServer.get<Note>(`/notes/${id}`);
   return response.data;
 };
 
 export const getMe = async (): Promise<User> => {
-  const { data } = await nextServer.get<User>('/api/users/me');
+  const { data } = await nextServer.get<User>('/users/me');
   return data;
 };
 
 export const updateMe = async (payload: UpdateUserRequest): Promise<User> => {
-  const response = await nextServer.patch<User>('/api/users/me', payload);
+  const response = await nextServer.patch<User>('/users/me', payload);
   return response.data;
 };
 
 export const createNote = async (newNote: CreateNoteData): Promise<Note> => {
-  const response = await nextClient.post<Note>('/api/notes', newNote);
+  const response = await nextClient.post<Note>('/notes', newNote);
   return response.data;
 };
 
 export const deleteNote = async (id: Note['id']): Promise<Note> => {
-  const response = await nextClient.delete<Note>(`/api/notes/${id}`);
+  const response = await nextClient.delete<Note>(`/notes/${id}`);
   return response.data;
 };
 
@@ -87,7 +87,7 @@ export const logout = async (): Promise<void> => {
 
 export const checkSession = async (): Promise<User | null> => {
   try {
-    const response = await nextClient.post<User>('/auth/current', {});
+    const response = await nextClient.get<User>('/auth/session');
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 401) {
