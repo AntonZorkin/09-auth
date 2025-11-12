@@ -12,7 +12,6 @@ const SignIn = () => {
   const setUser = useAuthStore((state) => state.setUser);
 
   const handleSubmit = async (formData: FormData) => {
-    // Скидаємо помилку перед новою спробою
     setError('');
 
     try {
@@ -29,7 +28,6 @@ const SignIn = () => {
         setError('Invalid email or password');
       }
     } catch (error) {
-      // ВИПРАВЛЕНО: Використовуємо захисник типу isAxiosError для безпечного оброблення помилки
       if (axios.isAxiosError(error)) {
         setError(
           (error.response?.data as { message?: string })?.message ||
@@ -44,45 +42,37 @@ const SignIn = () => {
 
   return (
     <main className={css.mainContent}>
-           {' '}
-      <form action={handleSubmit} className={css.form}>
-                <h1 className={css.formTitle}>Sign in</h1>       {' '}
+      {' '}
+      <h1 className={css.formTitle}>Sign in</h1>{' '}
+      <form action={handleSubmit} className={css.form}>        
         <div className={css.formGroup}>
-                    <label htmlFor="email">Email</label>
-                   {' '}
+          <label htmlFor="email">Email</label>{' '}
           <input
             id="email"
             type="email"
             name="email"
             className={css.input}
             required
-          />
-                 {' '}
-        </div>
-               {' '}
+          />{' '}
+        </div>{' '}
         <div className={css.formGroup}>
-                    <label htmlFor="password">Password</label>
-                   {' '}
+          <label htmlFor="password">Password</label>{' '}
           <input
             id="password"
             type="password"
             name="password"
             className={css.input}
             required
-          />
-                 {' '}
-        </div>
-               {' '}
+          />{' '}
+        </div>{' '}
         <div className={css.actions}>
-                   {' '}
+          {' '}
           <button type="submit" className={css.submitButton}>
-                        Log in          {' '}
-          </button>
-                 {' '}
+            Log in{' '}
+          </button>{' '}
         </div>
-                {error && <p className={css.error}>{error}</p>}     {' '}
-      </form>
-         {' '}
+        {error && <p className={css.error}>{error}</p>}{' '}
+      </form>{' '}
     </main>
   );
 };
